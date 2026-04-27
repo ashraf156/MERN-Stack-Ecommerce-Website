@@ -51,10 +51,61 @@ const refreshToken = (req, res) => {
     jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
       if (err) return res.status(400).json({ message: "Please login now!" });
       const accessToken = createAccessToken({ id: user.id });
-      res.json({ accessToken });
+      res.json({ user, accessToken });
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+};
+
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Please fill all required fields" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      path: "/api/users/refresh_token",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.json({ user, accessToken });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const logoutUser = (req, res) => {
+  try {
+    res.clearCookie("refreshToken", { path: "/api/users/refresh_token" });
+    return res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const getUser = async (req, res) => {
+  try {
+    const user =await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+    res.json(user);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -72,4 +123,7 @@ const createRefreshToken = (user) => {
 module.exports = {
   registerUser,
   refreshToken,
+  loginUser,
+  logoutUser,
+  getUser,
 };
