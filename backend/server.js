@@ -23,6 +23,9 @@ connectDB();
 
 //Routers
 app.use("/api/users", require("./routers/userRouter"));
+app.use("/api/category", require("./routers/categoryRouter"));
+app.use("/api/product", require("./routers/productRouter"));
+app.use("/api/upload", require("./routers/uploadRouter"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`.yellow.bold);

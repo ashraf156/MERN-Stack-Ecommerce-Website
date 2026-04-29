@@ -99,7 +99,7 @@ const logoutUser = (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user =await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(400).json({ message: "User does not exist" });
     }
