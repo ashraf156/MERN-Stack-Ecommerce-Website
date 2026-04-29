@@ -12,7 +12,7 @@ const {
 
 router.post("/create", createProduct);
 router.get("/getAllProducts", getAllProduct);
-router.get("/getProduct/:id", getAllProduct);
+router.get("/getProduct/:id", getProduct);
 router.delete("/deleteProduct/:id", deleteProduct);
 router.put("/updateProduct/:id", updateProduct);
 
