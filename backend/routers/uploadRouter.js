@@ -1,22 +1,12 @@
 const router = require("express").Router();
 const auth = require("../middelware/auth");
 const authAdmin = require("../middelware/authAdmin");
-const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
 
-// const cloudinary = require("cloudinary").v2;
-// cloudinary.config({
-//   cloud_name: process.env.cloud_name,
-//   api_key: process.env.api_key,
-//   api_secret: process.env.api_secret,
-// });
-
 //upload image only admin can use
-
 router.post("/upload", (req, res) => {
   try {
-    console.log(req.files.file);
     if (!req.files || Object.keys(req.files).length === 0)
       return res.status(400).json({ msg: "No files were uploaded." });
     const file = req.files.file;
@@ -53,7 +43,7 @@ router.post("/upload", (req, res) => {
 router.post("/destroy", (req, res) => {
   try {
     const { public_id } = req.body;
-    if (!public_id) res.status(400).json({ msg: "No images selected." });
+    if (!public_id) return res.status(400).json({ msg: "No images selected." });
     cloudinary.uploader.destroy(public_id, async (err, result) => {
       if (err) throw err;
       res.json({ msg: "Deleted Image" });

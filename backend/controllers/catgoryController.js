@@ -43,14 +43,26 @@ const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
 
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    const normalizedName = name.trim();
+    const existingCategory = await categories.findOne({ name: normalizedName });
+    if (existingCategory && existingCategory._id.toString() !== id) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
+
     const category = await categories.findByIdAndUpdate(
       id,
-      { name },
-      { new: true },
+      { name: normalizedName },
+      { new: true, runValidators: true },
     );
+
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
+
     res.status(200).json(category);
   } catch (error) {
     res.status(500).json({ message: error.message });
