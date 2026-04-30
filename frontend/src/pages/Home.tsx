@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { fetchProducts } from "../features/products/productSlice"
+import { addToCart } from "../features/cart/cartSlice"
 import "./home.css"
 
 const sortOptions = [
@@ -19,6 +20,8 @@ const Home = () => {
 
   const [sortBy, setSortBy] = useState("newest")
   const [minPrice, setMinPrice] = useState(0)
+  const { user } = useAppSelector(state => state.auth)
+  const navigate = useNavigate()
 
   useEffect(() => {
     dispatch(fetchProducts())
@@ -60,6 +63,14 @@ const Home = () => {
         discountedPrice: Math.round(product.price * 0.85),
       }))
   }, [products])
+
+  const handleAddToCart = (productId: string) => {
+    if (!user) {
+      navigate("/auth/login")
+      return
+    }
+    dispatch(addToCart({ productId }))
+  }
 
   return (
     <main className="home-page">
@@ -217,6 +228,12 @@ const Home = () => {
                   <div className="price-block">
                     <span className="price">${product.price}</span>
                   </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleAddToCart(product._id)}
+                  >
+                    Add to cart
+                  </button>
                 </div>
               </article>
             ))}

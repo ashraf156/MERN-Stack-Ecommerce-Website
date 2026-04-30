@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { logoutThunk } from "../features/auth/authSlice"
 import "./header.css"
 import Menu from "../assist/icon/menu.svg"
 import Close from "../assist/icon/close.svg"
@@ -7,6 +9,9 @@ import { Link } from "react-router-dom"
 
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false)
+  const dispatch = useAppDispatch()
+  const { user } = useAppSelector(state => state.auth)
+  const { items } = useAppSelector(state => state.cart)
 
   const closeNav = () => setIsNavOpen(false)
 
@@ -39,16 +44,34 @@ const Header = () => {
               Categories
             </Link>
           </li>
-          <li>
-            <Link to="/auth/login" onClick={closeNav}>
-              Login
-            </Link>
-          </li>
-          <li>
-            <Link to="/auth/register" onClick={closeNav}>
-              Register
-            </Link>
-          </li>
+          {user ? (
+            <>
+              <li>
+                <button
+                  className="header-logout"
+                  onClick={() => {
+                    dispatch(logoutThunk())
+                    closeNav()
+                  }}
+                >
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link to="/auth/login" onClick={closeNav}>
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/auth/register" onClick={closeNav}>
+                  Register
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
 
@@ -61,7 +84,7 @@ const Header = () => {
       </button>
 
       <div className="cart-icon">
-        <span>0</span>
+        <span>{items.length}</span>
         <Link to="/cart" onClick={closeNav}>
           <img src={Cart} alt="cart" width={30} />
         </Link>
